@@ -36,10 +36,12 @@
 		const BACK_HASH = 53.33333 + PIT_BOX;
 
 		const canvas = document.getElementById("canvas");
-		const ratio = Math.ceil(window.devicePixelRatio);
 		canvas.addEventListener("click", canvas.requestFullscreen);
+
 		const ctx = canvas.getContext("2d");
 		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+		
+		const ratio = Math.ceil(window.devicePixelRatio);
 		let scale = 0;
 		let performer = null;
 
