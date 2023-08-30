@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Doctor Ill</title>
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				height: 100%;
+			}
+
+			body {
+				overflow: hidden;
+				background-color: #0F0;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<canvas id="canvas"></canvas>
+	</body>
+
+	<script>
+		const FIELD_WIDTH = 160;
+		const FIELD_HEIGHT = 90.6;
+		const PIT_BOX = 5.33333;
+		const STEPS_PER_MARKER = 8;
+		const FRONT_HASH = 32 + PIT_BOX;
+		const BACK_HASH = 53.33333 + PIT_BOX;
+
+		const canvas = document.getElementById("canvas");
+		const ctx = canvas.getContext("2d");
+		const ratio = getRatio();
+
+		canvas.width = FIELD_WIDTH * ratio;
+		canvas.height = FIELD_HEIGHT * ratio;
+
+		drawField();
+
+		function drawField() {
+			const frontSideline = PIT_BOX * ratio;
+			const frontHash = FRONT_HASH * ratio;
+			const backHash = BACK_HASH * ratio;
+
+			ctx.fillStyle = "#008000";
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+			ctx.fillStyle = "#006400";
+			ctx.fillRect(0, 0, canvas.width, frontSideline);
+
+			ctx.fillStyle = "#FFF";
+			ctx.fillRect(0, frontSideline, canvas.width, 1);
+
+			for(let i = 0; i <= 20; i++){
+				ctx.fillRect(i * STEPS_PER_MARKER * ratio, frontSideline, ratio / (i == 10 ? 3 : 10), canvas.height - frontSideline);
+				
+				const yardLine = ((i * STEPS_PER_MARKER) - 2) * ratio;
+				ctx.fillRect(yardLine, frontHash, 4 * ratio, ratio / 10);
+				ctx.fillRect(yardLine, backHash, 4 * ratio, ratio / 10);
+
+				for(let j = 1; j < STEPS_PER_MARKER; j++){
+					ctx.fillRect(((i * STEPS_PER_MARKER) + j) * ratio, frontSideline, ratio / 10, ratio);
+				}
+			}
+		}
+
+		function getRatio() {
+			const isLandscape = (window.innerWidth > window.innerHeight);
+
+			if (isLandscape) {
+				return Math.floor(window.innerHeight / FIELD_HEIGHT);
+			} else {
+				return Math.floor(window.innerWidth / FIELD_WIDTH);
+			}
+		}
+	</script>
+
+</html>
