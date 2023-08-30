@@ -21,7 +21,7 @@
 				align-items: center;
 			}
 
-			#canvas{
+			#canvas {
 				transform: rotate(180deg);
 			}
 		</style>
@@ -41,12 +41,19 @@
 
 		const canvas = document.getElementById("canvas");
 		const ctx = canvas.getContext("2d");
-		const ratio = getRatio();
+		let ratio = 0;
 
-		canvas.width = FIELD_WIDTH * ratio;
-		canvas.height = FIELD_HEIGHT * ratio;
+		function resize() {
+			ratio = getRatio();
 
-		drawField();
+			canvas.width = FIELD_WIDTH * ratio;
+			canvas.height = FIELD_HEIGHT * ratio;
+			draw();
+		}
+
+		function draw() {
+			drawField();
+		}
 
 		function drawField() {
 			const frontSideline = PIT_BOX * ratio;
@@ -62,33 +69,32 @@
 			ctx.fillStyle = "#FFF";
 			ctx.fillRect(0, frontSideline, canvas.width, 1);
 
-			for(let i = 0; i <= 20; i++){
+			for (let i = 0; i <= 20; i++) {
 				ctx.fillRect(i * STEPS_PER_MARKER * ratio, frontSideline, ratio / (i == 10 ? 3 : 10), canvas.height - frontSideline);
-				
+
 				const yardLine = ((i * STEPS_PER_MARKER) - 2) * ratio;
 				ctx.fillRect(yardLine, frontHash, 4 * ratio, ratio / 10);
 				ctx.fillRect(yardLine, backHash, 4 * ratio, ratio / 10);
 
-				for(let j = 1; j < STEPS_PER_MARKER; j++){
+				for (let j = 1; j < STEPS_PER_MARKER; j++) {
 					ctx.fillRect(((i * STEPS_PER_MARKER) + j) * ratio, frontSideline, ratio / 10, ratio);
 				}
 			}
 
-			for(let i = 0; i < 7; i++){
-				ctx.arc((canvas.width / 2) + (ratio / 6	), frontSideline + (i * STEPS_PER_MARKER * ratio), ratio / 3, 0, 2 * Math.PI);
+			for (let i = 0; i < 7; i++) {
+				ctx.arc((canvas.width / 2) + (ratio / 6), frontSideline + (i * STEPS_PER_MARKER * ratio), ratio / 3, 0, 2 * Math.PI);
 				ctx.fill();
 			}
 		}
 
 		function getRatio() {
-			const isLandscape = (window.innerWidth > window.innerHeight);
-
-			if (isLandscape) {
-				return Math.floor(window.innerHeight / FIELD_HEIGHT);
-			} else {
-				return Math.floor(window.innerWidth / FIELD_WIDTH);
-			}
+			const w = Math.floor(window.innerHeight / FIELD_HEIGHT);
+			const h = Math.floor(window.innerWidth / FIELD_WIDTH);
+			return Math.min(w, h);
 		}
+
+		window.addEventListener("resize", resize);
+		resize();
 	</script>
 
 </html>
