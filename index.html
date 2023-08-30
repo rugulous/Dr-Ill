@@ -93,8 +93,20 @@
 			return Math.min(w, h);
 		}
 
+		function processDrill(text){
+			const drill = text.split("\n");
+			const symbol = drill[1];
+
+			const coords = drill[4].split(",");
+			console.log(`Found symbol ${symbol} at coords ${coords}!`);
+
+			ctx.fillText(symbol, (parseFloat(coords[0]) + 80) * ratio, (PIT_BOX + parseFloat(coords[1])) * ratio);
+		}
+
 		window.addEventListener("resize", resize);
 		resize();
+
+		fetch("sample.drill").then(res => res.text()).then(processDrill);
 	</script>
 
 </html>
