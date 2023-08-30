@@ -36,20 +36,22 @@
 		const BACK_HASH = 53.33333 + PIT_BOX;
 
 		const canvas = document.getElementById("canvas");
-		canvas.addEventListener("click", canvas.requestFullscreen);
-
 		const ctx = canvas.getContext("2d");
-		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+		canvas.addEventListener("click", canvas.requestFullscreen);
 		
 		const ratio = Math.ceil(window.devicePixelRatio);
+		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
 		let scale = 0;
 		let performer = null;
+		let currentSet = 0;
 
 		function resize() {
 			scale = getScale();
 
 			const w = (FIELD_WIDTH * scale);
 			const h = (FIELD_HEIGHT * scale);
+
 			canvas.width = w * ratio;
 			canvas.height = h * ratio;
 			canvas.style.width = `${w}px`;
@@ -65,7 +67,30 @@
 
 			if(performer != null){
 				ctx.font = `${scale * 2}px Asket`;
-				ctx.fillText(performer.symbol, (performer.x + 80) * scale, canvas.height - ((PIT_BOX + performer.y) * scale));
+				
+				let setIndex = currentSet;
+				console.log(performer.sets[currentSet]);
+				if(performer.sets[currentSet].isSubset){
+					console.log(`Got subset for set ${currentSet}!`);
+					while(true){
+						setIndex--;
+						if(!performer.sets[setIndex].isSubset){
+							console.log(`Set ${setIndex} is not subset!`);
+							console.log(performer.sets[setIndex]);
+							break;
+						}
+					}
+				}
+				
+				ctx.textAlign = "left";
+				ctx.fillText(`Set ${performer.sets[currentSet].identifier}`, 10, 50);
+
+				if(performer.sets[currentSet].isSubset){
+					ctx.fillText(`(Subset, so drawing set ${performer.sets[setIndex].identifier})`, 10, 100);
+				}
+
+				ctx.textAlign = "center";
+				ctx.fillText(performer.symbol, (performer.sets[setIndex].x + 80) * scale, canvas.height - ((PIT_BOX + performer.sets[setIndex].y) * scale));
 			}
 		}
 
@@ -108,22 +133,50 @@
 		}
 
 		function processDrill(text){
-			const drill = text.split("\n");
-			const symbol = drill[1];
-
-			const coords = drill[4].split(",");
-			console.log(`Found symbol ${symbol} at coords ${coords}!`);
-
+			const drill = text.replaceAll("\r", "").split("\n");
 			performer = {
-				symbol,
-				x: parseFloat(coords[0]),
-				y: parseFloat(coords[1])
+				name: drill[0],
+				symbol: drill[1],
+				sets: []
 			};
+
+			for(let i = 2; i < drill.length - 1; i += 3){
+				const set = {
+					identifier: drill[i],
+					counts: drill[i + 1],
+					isSubset: drill[i + 2] == "-"
+				};
+
+				if(!set.isSubset){
+					const coords = drill[i + 2].split(",");
+					set.x = parseFloat(coords[0]) * -1;
+					set.y = parseFloat(coords[1]);
+
+					if(isNaN(set.x) || isNaN(set.y)){
+						console.log(coords);
+					}
+				}
+
+				performer.sets.push(set);
+			}
 
 			draw();
 		}
 
 		window.addEventListener("resize", resize);
+		window.addEventListener("keydown", ev => {
+			if(ev.key == "ArrowLeft" && currentSet > 0){
+				currentSet--;
+			} else if(ev.key == "ArrowRight" && currentSet < performer?.sets.length - 1){
+				currentSet++;
+			} else {
+				return;
+			}
+
+			console.log(currentSet);
+			draw();
+		});
+
 		resize();
 
 		fetch("sample.drill").then(res => res.text()).then(processDrill);
