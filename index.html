@@ -36,25 +36,41 @@
 		const BACK_HASH = 53.33333 + PIT_BOX;
 
 		const canvas = document.getElementById("canvas");
+		const ratio = Math.ceil(window.devicePixelRatio);
+		canvas.addEventListener("click", canvas.requestFullscreen);
 		const ctx = canvas.getContext("2d");
-		let ratio = 0;
+		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+		let scale = 0;
+		let performer = null;
 
 		function resize() {
-			ratio = getRatio();
+			scale = getScale();
 
-			canvas.width = FIELD_WIDTH * ratio;
-			canvas.height = FIELD_HEIGHT * ratio;
+			const w = (FIELD_WIDTH * scale);
+			const h = (FIELD_HEIGHT * scale);
+			canvas.width = w * ratio;
+			canvas.height = h * ratio;
+			canvas.style.width = `${w}px`;
+			canvas.style.height = `${h}px`;
+
+			scale *= ratio;
+
 			draw();
 		}
 
 		function draw() {
 			drawField();
+
+			if(performer != null){
+				ctx.font = `${scale * 2}px Asket`;
+				ctx.fillText(performer.symbol, (performer.x + 80) * scale, canvas.height - ((PIT_BOX + performer.y) * scale));
+			}
 		}
 
 		function drawField() {
-			const frontSideline = PIT_BOX * ratio;
-			const frontHash = FRONT_HASH * ratio;
-			const backHash = BACK_HASH * ratio;
+			const frontSideline = PIT_BOX * scale;
+			const frontHash = FRONT_HASH * scale;
+			const backHash = BACK_HASH * scale;
 
 			ctx.fillStyle = "#008000";
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -66,24 +82,24 @@
 			ctx.fillRect(0, canvas.height - frontSideline, canvas.width, 1);
 
 			for (let i = 0; i <= 20; i++) {
-				ctx.fillRect(i * STEPS_PER_MARKER * ratio, 0, ratio / (i == 10 ? 3 : 10), canvas.height - frontSideline);
+				ctx.fillRect(i * STEPS_PER_MARKER * scale, 0, scale / (i == 10 ? 3 : 10), canvas.height - frontSideline);
 
-				const yardLine = ((i * STEPS_PER_MARKER) - 2) * ratio;
-				ctx.fillRect(yardLine, canvas.height - frontHash, 4 * ratio, ratio / 10);
-				ctx.fillRect(yardLine, canvas.height - backHash, 4 * ratio, ratio / 10);
+				const yardLine = ((i * STEPS_PER_MARKER) - 2) * scale;
+				ctx.fillRect(yardLine, canvas.height - frontHash, 4 * scale, scale / 10);
+				ctx.fillRect(yardLine, canvas.height - backHash, 4 * scale, scale / 10);
 
 				for (let j = 1; j < STEPS_PER_MARKER; j++) {
-					ctx.fillRect(((i * STEPS_PER_MARKER) + j) * ratio, canvas.height - frontSideline - ratio, ratio / 10, ratio);
+					ctx.fillRect(((i * STEPS_PER_MARKER) + j) * scale, canvas.height - frontSideline - scale, scale / 10, scale);
 				}
 			}
 
 			for (let i = 0; i < 7; i++) {
-				ctx.arc((canvas.width / 2) + (ratio / 6), canvas.height - (frontSideline + (i * STEPS_PER_MARKER * ratio)), ratio / 3, 0, 2 * Math.PI);
+				ctx.arc((canvas.width / 2) + (scale / 6), canvas.height - (frontSideline + (i * STEPS_PER_MARKER * scale)), scale / 3, 0, 2 * Math.PI);
 				ctx.fill();
 			}
 		}
 
-		function getRatio() {
+		function getScale() {
 			const w = Math.floor(window.innerHeight / FIELD_HEIGHT);
 			const h = Math.floor(window.innerWidth / FIELD_WIDTH);
 			return Math.min(w, h);
@@ -96,7 +112,13 @@
 			const coords = drill[4].split(",");
 			console.log(`Found symbol ${symbol} at coords ${coords}!`);
 
-			ctx.fillText(symbol, (parseFloat(coords[0]) + 80) * ratio, canvas.height - ((PIT_BOX + parseFloat(coords[1])) * ratio));
+			performer = {
+				symbol,
+				x: parseFloat(coords[0]),
+				y: parseFloat(coords[1])
+			};
+
+			draw();
 		}
 
 		window.addEventListener("resize", resize);
