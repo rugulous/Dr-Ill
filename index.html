@@ -20,6 +20,10 @@
 				justify-content: center;
 				align-items: center;
 			}
+
+			#canvas{
+				transform: rotate(180deg);
+			}
 		</style>
 	</head>
 
@@ -68,6 +72,11 @@
 				for(let j = 1; j < STEPS_PER_MARKER; j++){
 					ctx.fillRect(((i * STEPS_PER_MARKER) + j) * ratio, frontSideline, ratio / 10, ratio);
 				}
+			}
+
+			for(let i = 0; i < 7; i++){
+				ctx.arc((canvas.width / 2) + (ratio / 6	), frontSideline + (i * STEPS_PER_MARKER * ratio), ratio / 3, 0, 2 * Math.PI);
+				ctx.fill();
 			}
 		}
 
