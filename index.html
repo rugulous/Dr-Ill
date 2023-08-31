@@ -71,12 +71,9 @@
 				let setIndex = currentSet;
 				console.log(performer.sets[currentSet]);
 				if(performer.sets[currentSet].isSubset){
-					console.log(`Got subset for set ${currentSet}!`);
 					while(true){
 						setIndex--;
 						if(!performer.sets[setIndex].isSubset){
-							console.log(`Set ${setIndex} is not subset!`);
-							console.log(performer.sets[setIndex]);
 							break;
 						}
 					}
@@ -151,10 +148,6 @@
 					const coords = drill[i + 2].split(",");
 					set.x = parseFloat(coords[0]) * -1;
 					set.y = parseFloat(coords[1]);
-
-					if(isNaN(set.x) || isNaN(set.y)){
-						console.log(coords);
-					}
 				}
 
 				performer.sets.push(set);
