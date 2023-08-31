@@ -86,12 +86,6 @@
 		}
 
 		function drawSet(set) {
-			canvas.drawText(`Set ${performer.sets[currentSet].identifier}`, 1, 5, { font: `${scale * 2}px Asket`, alignment: "left" });
-
-			if (performer.sets[currentSet].isSubset) {
-				canvas.drawText(`(Subset, so drawing set ${performer.sets[set].identifier})`, 1, 10);
-			}
-
 			canvas.drawText(performer.symbol, performer.sets[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + performer.sets[set].y), { alignment: "center" });
 		}
 
