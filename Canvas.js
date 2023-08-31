@@ -32,6 +32,7 @@ class Canvas {
 
 	setFont(font) {
 		this.#ctx.font = font;
+		this.#ctx.textBaseline = "middle";
 	}
 
 	setTextAlign(alignment) {
@@ -84,6 +85,6 @@ class Canvas {
 			this.setFont(font);
 		}
 
-		this.#ctx.fillText(text, x * this.#scale, y * this.#scale);
+		this.#ctx.fillText(text, x * this.#scale, (y * this.#scale) + 1.5);
 	}
 }
