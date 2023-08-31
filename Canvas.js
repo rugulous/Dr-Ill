@@ -15,8 +15,6 @@ class Canvas {
 	}
 
 	setScale(scale) {
-		console.log(scale);
-
 		const w = this.#targetW * scale;
 		const h = this.#targetH * scale;
 		const ratio = Math.ceil(window.devicePixelRatio);
@@ -50,6 +48,14 @@ class Canvas {
 		}
 
 		this.#ctx.fillRect(Math.round(x * this.#scale), Math.round(y * this.#scale), Math.round(w * this.#scale), Math.round(h * this.#scale));
+	}
+
+	strokeRect(x, y, w, h, colour = null){
+		if(colour != null){
+			this.setFill(colour);
+		}
+
+		this.#ctx.strokeRect(Math.round(x * this.#scale), Math.round(y * this.#scale), Math.round(w * this.#scale), Math.round(h * this.#scale))
 	}
 
 	drawCircle(x, y, radius, colour = null) {
