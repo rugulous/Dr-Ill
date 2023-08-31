@@ -41,6 +41,7 @@
 		let performer = null;
 		let currentSet = 0;
 		let showGrid = JSON.parse(localStorage.getItem("showGrid"));
+		let setXOffset = 0;
 
 		function resize() {
 			scale = getScale();
@@ -69,7 +70,7 @@
 		}
 
 		function drawShow(){
-			let startX = 0;
+			let startX = setXOffset;
 			canvas.setTextAlign("center");
 			canvas.setFont("10px sans-serif");
 			performer.sets.forEach(set => {
@@ -173,7 +174,9 @@
 		window.addEventListener("keydown", ev => {
 			if (ev.key == "ArrowLeft" && currentSet > 0) {
 				currentSet--;
+				setXOffset += performer.sets[currentSet].counts;
 			} else if (ev.key == "ArrowRight" && currentSet < performer?.sets.length - 1) {
+				setXOffset -= performer.sets[currentSet].counts;
 				currentSet++;
 			} else if(ev.key == "g"){
 				showGrid = !showGrid;
