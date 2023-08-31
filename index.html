@@ -27,6 +27,8 @@
 		<canvas id="canvas"></canvas>
 	</body>
 
+	<script src="Canvas.js"></script>
+
 	<script>
 		const FIELD_WIDTH = 160;
 		const FIELD_HEIGHT = 90.6;
@@ -35,30 +37,13 @@
 		const FRONT_HASH = 32 + PIT_BOX;
 		const BACK_HASH = 53.33333 + PIT_BOX;
 
-		const canvas = document.getElementById("canvas");
-		const ctx = canvas.getContext("2d");
-		canvas.addEventListener("click", canvas.requestFullscreen);
-
-		const ratio = Math.ceil(window.devicePixelRatio);
-		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-
-		let scale = 0;
+		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
 		let performer = null;
 		let currentSet = 0;
 
 		function resize() {
 			scale = getScale();
-
-			const w = (FIELD_WIDTH * scale);
-			const h = (FIELD_HEIGHT * scale);
-
-			canvas.width = w * ratio;
-			canvas.height = h * ratio;
-			canvas.style.width = `${w}px`;
-			canvas.style.height = `${h}px`;
-
-			scale *= ratio;
-
+			canvas.setScale(scale);
 			draw();
 		}
 
@@ -66,8 +51,6 @@
 			drawField();
 
 			if (performer != null) {
-				ctx.font = `${scale * 2}px Asket`;
-
 				let setIndex = currentSet;
 				if (performer.sets[currentSet].isSubset) {
 					while (true) {
@@ -84,56 +67,36 @@
 		}
 
 		function drawSet(set) {
-			ctx.textAlign = "left";
-			drawText(`Set ${performer.sets[currentSet].identifier}`, 1, 5);
+			canvas.drawText(`Set ${performer.sets[currentSet].identifier}`, 1, 5, {font: `${scale * 2}px Asket`, alignment: "left"});
 
 			if (performer.sets[currentSet].isSubset) {
-				drawText(`(Subset, so drawing set ${performer.sets[set].identifier})`, 1, 10);
+				canvas.drawText(`(Subset, so drawing set ${performer.sets[set].identifier})`, 1, 10);
 			}
 
-			ctx.textAlign = "center";
-			drawText(performer.symbol, performer.sets[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + performer.sets[set].y));
+			canvas.drawText(performer.symbol, performer.sets[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + performer.sets[set].y), {alignment: "center"});
 		}
 
 		function drawField() {
-			ctx.fillStyle = "#008000";
-			drawRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
-
-			ctx.fillStyle = "#006400";
-			drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, PIT_BOX);
-
-			ctx.fillStyle = "#FFF";
-			drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, 1 / scale);
+			canvas.drawRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT, "#008000");
+			canvas.drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, PIT_BOX, "#006400");
+			canvas.drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, 1 / scale, "#FFF");
 
 			for (let i = 0; i <= 20; i++) {
-				drawRect(i * STEPS_PER_MARKER, 0, (i == 10 ? 0.3333 : 0.1), FIELD_HEIGHT - PIT_BOX);
+				canvas.drawRect(i * STEPS_PER_MARKER, 0, (i == 10 ? 0.3333 : 0.1), FIELD_HEIGHT - PIT_BOX);
 
 				const yardLine = (i * STEPS_PER_MARKER) - 2;
 
-				drawRect(yardLine, FIELD_HEIGHT - FRONT_HASH, 4, 0.1);
-				drawRect(yardLine, FIELD_HEIGHT - BACK_HASH, 4, 0.1);
+				canvas.drawRect(yardLine, FIELD_HEIGHT - FRONT_HASH, 4, 0.1);
+				canvas.drawRect(yardLine, FIELD_HEIGHT - BACK_HASH, 4, 0.1);
 
 				for (let j = 1; j < STEPS_PER_MARKER; j++) {
-					drawRect((i * STEPS_PER_MARKER) + j, FIELD_HEIGHT - PIT_BOX - 1, 0.1, 1);
+					canvas.drawRect((i * STEPS_PER_MARKER) + j, FIELD_HEIGHT - PIT_BOX - 1, 0.1, 1);
 				}
 			}
 
 			for (let i = 0; i < 7; i++) {
-				drawCircle(FIELD_WIDTH / 2, FIELD_HEIGHT - (PIT_BOX + (i * STEPS_PER_MARKER)), 0.33333);
+				canvas.drawCircle(FIELD_WIDTH / 2, FIELD_HEIGHT - (PIT_BOX + (i * STEPS_PER_MARKER)), 0.33333);
 			}
-		}
-
-		function drawRect(x, y, w, h) {
-			ctx.fillRect(x * scale, y * scale, w * scale, h * scale);
-		}
-
-		function drawCircle(x, y, radius) {
-			ctx.arc((x + (radius / 2)) * scale, y * scale, radius * scale, 0, Math.PI * 2);
-			ctx.fill();
-		}
-
-		function drawText(text, x, y){
-			ctx.fillText(text, x * scale, y * scale);
 		}
 
 		function getScale() {
