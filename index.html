@@ -36,6 +36,7 @@
 		const STEPS_PER_MARKER = 8;
 		const FRONT_HASH = 32 + PIT_BOX;
 		const BACK_HASH = 53.33333 + PIT_BOX;
+		const font = "sans-serif";
 
 		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
 		let performer = null;
@@ -72,13 +73,13 @@
 		function drawShow(){
 			let startX = setXOffset;
 			canvas.setTextAlign("center");
-			canvas.setFont(`${1.5 * scale}px sans-serif`);
+			canvas.setFont(`${scale * 1.5}px ${font}`);
 			performer.sets.forEach((set, i) => {
 				const width = (i == performer.sets.length - 1) ? FIELD_WIDTH : set.counts;
 
 				canvas.drawRect(startX, 0, width, 3, (startX == 0 ? "#FFF" : "rgba(255, 255, 255, 0.6)"));
 				canvas.strokeRect(startX, 0, width, 3, "#000");
-				canvas.drawText(set.identifier, startX + (width / 2), 2);
+				canvas.drawText(set.identifier, startX + (width / 2), 1.5);
 				startX += set.counts;
 			});
 
@@ -86,6 +87,8 @@
 		}
 
 		function drawSet(set) {
+			canvas.setFill("#F00");
+			canvas.setFont(`bold ${scale * 2}px ${font}`);
 			canvas.drawText(performer.symbol, performer.sets[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + performer.sets[set].y), { alignment: "center" });
 		}
 
