@@ -40,6 +40,7 @@
 		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
 		let performer = null;
 		let currentSet = 0;
+		let showGrid = JSON.parse(localStorage.getItem("showGrid"));
 
 		function resize() {
 			scale = getScale();
@@ -67,19 +68,40 @@
 		}
 
 		function drawSet(set) {
-			canvas.drawText(`Set ${performer.sets[currentSet].identifier}`, 1, 5, {font: `${scale * 2}px Asket`, alignment: "left"});
+			canvas.drawText(`Set ${performer.sets[currentSet].identifier}`, 1, 5, { font: `${scale * 2}px Asket`, alignment: "left" });
 
 			if (performer.sets[currentSet].isSubset) {
 				canvas.drawText(`(Subset, so drawing set ${performer.sets[set].identifier})`, 1, 10);
 			}
 
-			canvas.drawText(performer.symbol, performer.sets[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + performer.sets[set].y), {alignment: "center"});
+			canvas.drawText(performer.symbol, performer.sets[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + performer.sets[set].y), { alignment: "center" });
 		}
 
 		function drawField() {
 			canvas.drawRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT, "#008000");
 			canvas.drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, PIT_BOX, "#006400");
 			canvas.drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, 1 / scale, "#FFF");
+
+			if (showGrid) {
+				canvas.setFill("rgba(200, 200, 200, 0.3)");
+				for (let x = 0; x < FIELD_WIDTH; x++) {
+					canvas.drawRect(x, 0, 0.1, FIELD_HEIGHT - PIT_BOX);
+				}
+
+				for (let y = FIELD_HEIGHT - PIT_BOX; y > 0; y--) {
+					if (Math.floor(y - 1) % 4 == 0) {
+						canvas.setFill("rgba(200, 200, 200, 0.6)");
+					}
+
+					canvas.drawRect(0, y, FIELD_WIDTH, 0.1);
+
+					if (Math.floor(y - 1) % 4 == 0) {
+						canvas.setFill("rgba(200, 200, 200, 0.3)");
+					}
+				}
+
+				canvas.setFill("#FFF");
+			}
 
 			for (let i = 0; i <= 20; i++) {
 				canvas.drawRect(i * STEPS_PER_MARKER, 0, (i == 10 ? 0.3333 : 0.1), FIELD_HEIGHT - PIT_BOX);
@@ -138,6 +160,9 @@
 				currentSet--;
 			} else if (ev.key == "ArrowRight" && currentSet < performer?.sets.length - 1) {
 				currentSet++;
+			} else if(ev.key == "g"){
+				showGrid = !showGrid;
+				localStorage.setItem("showGrid", showGrid);
 			} else {
 				return;
 			}

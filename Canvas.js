@@ -15,6 +15,8 @@ class Canvas {
 	}
 
 	setScale(scale) {
+		console.log(scale);
+
 		const w = this.#targetW * scale;
 		const h = this.#targetH * scale;
 		const ratio = Math.ceil(window.devicePixelRatio);
@@ -47,7 +49,7 @@ class Canvas {
 			this.setFill(colour);
 		}
 
-		this.#ctx.fillRect(x * this.#scale, y * this.#scale, w * this.#scale, h * this.#scale);
+		this.#ctx.fillRect(Math.round(x * this.#scale), Math.round(y * this.#scale), Math.round(w * this.#scale), Math.round(h * this.#scale));
 	}
 
 	drawCircle(x, y, radius, colour = null) {
@@ -55,7 +57,7 @@ class Canvas {
 			this.setFill(colour);
 		}
 
-		this.#ctx.arc((x + (radius / 2)) * this.#scale, y * this.#scale, radius * this.#scale, 0, Math.PI * 2);
+		this.#ctx.arc(Math.round((x + (radius / 2)) * this.#scale), Math.round(y * this.#scale), Math.round(radius * this.#scale), 0, Math.PI * 2);
 		this.#ctx.fill();
 	}
 
@@ -76,6 +78,6 @@ class Canvas {
 			this.setFont(font);
 		}
 
-		this.#ctx.fillText(text, x * this.#scale, y * this.#scale);
+		this.#ctx.fillText(text, Math.round(x * this.#scale), Math.round(y * this.#scale));
 	}
 }
