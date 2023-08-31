@@ -38,7 +38,7 @@
 		const canvas = document.getElementById("canvas");
 		const ctx = canvas.getContext("2d");
 		canvas.addEventListener("click", canvas.requestFullscreen);
-		
+
 		const ratio = Math.ceil(window.devicePixelRatio);
 		ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
 
@@ -65,62 +65,75 @@
 		function draw() {
 			drawField();
 
-			if(performer != null){
+			if (performer != null) {
 				ctx.font = `${scale * 2}px Asket`;
-				
+
 				let setIndex = currentSet;
-				console.log(performer.sets[currentSet]);
-				if(performer.sets[currentSet].isSubset){
-					while(true){
+				if (performer.sets[currentSet].isSubset) {
+					while (true) {
 						setIndex--;
-						if(!performer.sets[setIndex].isSubset){
+						if (!performer.sets[setIndex].isSubset) {
 							break;
 						}
 					}
 				}
-				
-				ctx.textAlign = "left";
-				ctx.fillText(`Set ${performer.sets[currentSet].identifier}`, 10, 50);
 
-				if(performer.sets[currentSet].isSubset){
-					ctx.fillText(`(Subset, so drawing set ${performer.sets[setIndex].identifier})`, 10, 100);
-				}
-
-				ctx.textAlign = "center";
-				ctx.fillText(performer.symbol, (performer.sets[setIndex].x + 80) * scale, canvas.height - ((PIT_BOX + performer.sets[setIndex].y) * scale));
+				drawSet(setIndex);
 			}
+
+		}
+
+		function drawSet(set) {
+			ctx.textAlign = "left";
+			drawText(`Set ${performer.sets[currentSet].identifier}`, 1, 5);
+
+			if (performer.sets[currentSet].isSubset) {
+				drawText(`(Subset, so drawing set ${performer.sets[set].identifier})`, 1, 10);
+			}
+
+			ctx.textAlign = "center";
+			drawText(performer.symbol, performer.sets[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + performer.sets[set].y));
 		}
 
 		function drawField() {
-			const frontSideline = PIT_BOX * scale;
-			const frontHash = FRONT_HASH * scale;
-			const backHash = BACK_HASH * scale;
-
 			ctx.fillStyle = "#008000";
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			drawRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
 
 			ctx.fillStyle = "#006400";
-			ctx.fillRect(0, canvas.height - frontSideline, canvas.width, frontSideline);
+			drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, PIT_BOX);
 
 			ctx.fillStyle = "#FFF";
-			ctx.fillRect(0, canvas.height - frontSideline, canvas.width, 1);
+			drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, 1 / scale);
 
 			for (let i = 0; i <= 20; i++) {
-				ctx.fillRect(i * STEPS_PER_MARKER * scale, 0, scale / (i == 10 ? 3 : 10), canvas.height - frontSideline);
+				drawRect(i * STEPS_PER_MARKER, 0, (i == 10 ? 0.3333 : 0.1), FIELD_HEIGHT - PIT_BOX);
 
-				const yardLine = ((i * STEPS_PER_MARKER) - 2) * scale;
-				ctx.fillRect(yardLine, canvas.height - frontHash, 4 * scale, scale / 10);
-				ctx.fillRect(yardLine, canvas.height - backHash, 4 * scale, scale / 10);
+				const yardLine = (i * STEPS_PER_MARKER) - 2;
+
+				drawRect(yardLine, FIELD_HEIGHT - FRONT_HASH, 4, 0.1);
+				drawRect(yardLine, FIELD_HEIGHT - BACK_HASH, 4, 0.1);
 
 				for (let j = 1; j < STEPS_PER_MARKER; j++) {
-					ctx.fillRect(((i * STEPS_PER_MARKER) + j) * scale, canvas.height - frontSideline - scale, scale / 10, scale);
+					drawRect((i * STEPS_PER_MARKER) + j, FIELD_HEIGHT - PIT_BOX - 1, 0.1, 1);
 				}
 			}
 
 			for (let i = 0; i < 7; i++) {
-				ctx.arc((canvas.width / 2) + (scale / 6), canvas.height - (frontSideline + (i * STEPS_PER_MARKER * scale)), scale / 3, 0, 2 * Math.PI);
-				ctx.fill();
+				drawCircle(FIELD_WIDTH / 2, FIELD_HEIGHT - (PIT_BOX + (i * STEPS_PER_MARKER)), 0.33333);
 			}
+		}
+
+		function drawRect(x, y, w, h) {
+			ctx.fillRect(x * scale, y * scale, w * scale, h * scale);
+		}
+
+		function drawCircle(x, y, radius) {
+			ctx.arc((x + (radius / 2)) * scale, y * scale, radius * scale, 0, Math.PI * 2);
+			ctx.fill();
+		}
+
+		function drawText(text, x, y){
+			ctx.fillText(text, x * scale, y * scale);
 		}
 
 		function getScale() {
@@ -129,7 +142,7 @@
 			return Math.min(w, h);
 		}
 
-		function processDrill(text){
+		function processDrill(text) {
 			const drill = text.replaceAll("\r", "").split("\n");
 			performer = {
 				name: drill[0],
@@ -137,14 +150,14 @@
 				sets: []
 			};
 
-			for(let i = 2; i < drill.length - 1; i += 3){
+			for (let i = 2; i < drill.length - 1; i += 3) {
 				const set = {
 					identifier: drill[i],
 					counts: drill[i + 1],
 					isSubset: drill[i + 2] == "-"
 				};
 
-				if(!set.isSubset){
+				if (!set.isSubset) {
 					const coords = drill[i + 2].split(",");
 					set.x = parseFloat(coords[0]) * -1;
 					set.y = parseFloat(coords[1]);
@@ -158,15 +171,14 @@
 
 		window.addEventListener("resize", resize);
 		window.addEventListener("keydown", ev => {
-			if(ev.key == "ArrowLeft" && currentSet > 0){
+			if (ev.key == "ArrowLeft" && currentSet > 0) {
 				currentSet--;
-			} else if(ev.key == "ArrowRight" && currentSet < performer?.sets.length - 1){
+			} else if (ev.key == "ArrowRight" && currentSet < performer?.sets.length - 1) {
 				currentSet++;
 			} else {
 				return;
 			}
 
-			console.log(currentSet);
 			draw();
 		});
 
