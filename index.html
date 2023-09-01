@@ -165,7 +165,13 @@
 
 		resize();
 
-		fetch("all.drill").then(res => res.text()).then(processAllDrill);
+		const params = new URLSearchParams(window.location.search);
+		const fileToLoad = params.get("piece");
+		if(!fileToLoad){
+			window.location.href = "?piece=P1.drill";
+		}
+
+		fetch(`drill/${fileToLoad}`).then(res => res.text()).then(processAllDrill);
 
 		function processAllDrill(text) {
 			let maxX = 0, maxY = 0;
