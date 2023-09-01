@@ -55,7 +55,7 @@
 
 		const params = new URLSearchParams(window.location.search);
 		const fileToLoad = params.get("piece");
-		if(!fileToLoad){
+		if (!fileToLoad) {
 			window.location.href = "?piece=P1.drill";
 		}
 
@@ -67,13 +67,17 @@
 
 			show = s;
 
-			canvas.resize(FIELD_WIDTH, FIELD_HEIGHT);
-			resize();
+			resize(FIELD_WIDTH, FIELD_HEIGHT);
 		});
 
-		function resize() {
+		function resize(width = null, height = null) {
 			scale = getScale();
-			canvas.setScale(scale);
+
+			if (width != null && height != null) {
+				canvas.resize(width, height, scale);
+			} else {
+				canvas.setScale(scale);
+			}
 			draw();
 		}
 

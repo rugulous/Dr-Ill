@@ -14,11 +14,11 @@ class Canvas {
 		this.#targetH = targetH;
 	}
 
-	resize(targetW, targetH){
+	resize(targetW, targetH, scale){
 		this.#targetW = targetW;
 		this.#targetH = targetH;
 
-		this.setScale(this.#scale);
+		this.setScale(scale);
 	}
 
 	setScale(scale) {
