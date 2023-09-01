@@ -33,7 +33,7 @@
 		const NUM_MARKERS = 14;
 		const STEPS_PER_MARKER = 8;
 		const FIELD_WIDTH = NUM_MARKERS * STEPS_PER_MARKER;
-		const FIELD_HEIGHT = 50.6;
+		const FIELD_HEIGHT = 60.6;
 		const PIT_BOX = 5.33333;
 		const FRONT_HASH = 32 + PIT_BOX;
 		const BACK_HASH = 53.33333 + PIT_BOX;
@@ -201,7 +201,7 @@
 					continue;
 				}
 
-				const coords = lines[i + 2].split(",");
+				const coords = lines[i].split(",");
 				let dot = {
 					x: parseFloat(coords[0]) * -1,
 					y: parseFloat(coords[1])
