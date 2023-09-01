@@ -43,6 +43,7 @@
 		let currentSet = 0;
 		let showGrid = JSON.parse(localStorage.getItem("showGrid"));
 		let setXOffset = 0;
+		let scale = 0;
 
 		const show = {
 			name: "",
@@ -163,10 +164,6 @@
 			draw();
 		});
 
-		resize();
-		
-		setTimeout(resize, 10);
-
 		const params = new URLSearchParams(window.location.search);
 		const fileToLoad = params.get("piece");
 		if(!fileToLoad){
@@ -241,7 +238,7 @@
 
 			canvas.resize(FIELD_WIDTH, FIELD_HEIGHT);
 
-			draw();
+			resize();
 		}
 	</script>
 
