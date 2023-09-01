@@ -30,10 +30,10 @@
 	<script src="Canvas.js"></script>
 
 	<script>
-		const NUM_MARKERS = 14;
+		let NUM_MARKERS = 14;
 		const STEPS_PER_MARKER = 8;
-		const FIELD_WIDTH = NUM_MARKERS * STEPS_PER_MARKER;
-		const FIELD_HEIGHT = 60.6;
+		let FIELD_WIDTH = NUM_MARKERS * STEPS_PER_MARKER;
+		let FIELD_HEIGHT = 60.6;
 		const PIT_BOX = 5.33333;
 		const FRONT_HASH = 32 + PIT_BOX;
 		const BACK_HASH = 53.33333 + PIT_BOX;
@@ -168,6 +168,8 @@
 		fetch("all.drill").then(res => res.text()).then(processAllDrill);
 
 		function processAllDrill(text) {
+			let maxX = 0, maxY = 0;
+
 			const lines = text.split("\r\n");
 			show.name = lines[0];
 			show.bpm = parseInt(lines[1]);
@@ -207,13 +209,29 @@
 					y: parseFloat(coords[1])
 				};
 
+				
 				if (isNaN(dot.x) || isNaN(dot.y)) {
 					dot = performer.dots[performer.dots.length - 1];
 				}
 
+				if(Math.abs(dot.x) > maxX){
+					maxX = Math.abs(dot.x);
+				}
+
+				if(dot.y > maxY){
+					maxY = dot.y;
+				}
+				
 				performer.dots.push(dot);
 				i++;
 			}
+
+			//yum - maybe these shouldn't be CONSTANT_CASE
+			NUM_MARKERS = Math.ceil(maxX / STEPS_PER_MARKER) * 2;
+			FIELD_WIDTH = NUM_MARKERS * STEPS_PER_MARKER;
+			FIELD_HEIGHT = maxY + 4 + PIT_BOX;
+
+			canvas.resize(FIELD_WIDTH, FIELD_HEIGHT);
 
 			draw();
 		}
