@@ -28,6 +28,7 @@
 	</body>
 
 	<script src="Canvas.js"></script>
+	<script src="DrillLoader.js"></script>
 
 	<script>
 		let NUM_MARKERS = 14;
@@ -45,13 +46,30 @@
 		let setXOffset = 0;
 		let scale = 0;
 
-		const show = {
+		let show = {
 			name: "",
 			bpm: 0,
 			sets: [],
 			performers: []
 		};
 
+		const params = new URLSearchParams(window.location.search);
+		const fileToLoad = params.get("piece");
+		if(!fileToLoad){
+			window.location.href = "?piece=P1.drill";
+		}
+
+		const loader = new DrillLoader(`drill/${fileToLoad}`);
+		loader.load().then(s => {
+			NUM_MARKERS = Math.ceil(s.width / STEPS_PER_MARKER) * 2;
+			FIELD_WIDTH = NUM_MARKERS * STEPS_PER_MARKER;
+			FIELD_HEIGHT = s.height + 4 + PIT_BOX;
+
+			show = s;
+
+			canvas.resize(FIELD_WIDTH, FIELD_HEIGHT);
+			resize();
+		});
 
 		function resize() {
 			scale = getScale();
@@ -163,83 +181,6 @@
 
 			draw();
 		});
-
-		const params = new URLSearchParams(window.location.search);
-		const fileToLoad = params.get("piece");
-		if(!fileToLoad){
-			window.location.href = "?piece=P1.drill";
-		}
-
-		fetch(`drill/${fileToLoad}`).then(res => res.text()).then(processAllDrill);
-
-		function processAllDrill(text) {
-			let maxX = 0, maxY = 0;
-
-			const lines = text.split("\r\n");
-			show.name = lines[0];
-			show.bpm = parseInt(lines[1]);
-
-			let i;
-			for (i = 2; i < lines.length; i += 2) {
-				if (lines[i] == "-----") {
-					break;
-				}
-
-				show.sets.push({
-					identifier: lines[i],
-					counts: parseInt(lines[i + 1])
-				});
-			}
-
-			let performer = null;
-			while (i < lines.length - 2) {
-				if (lines[i] == "-----") {
-					if (performer != null) {
-						show.performers.push(performer);
-					}
-
-					performer = {
-						name: lines[i + 1],
-						symbol: lines[i + 2],
-						dots: []
-					};
-
-					i += 3;
-					continue;
-				}
-
-				const coords = lines[i].split(",");
-				let dot = {
-					x: parseFloat(coords[0]) * -1,
-					y: parseFloat(coords[1])
-				};
-
-				
-				if (isNaN(dot.x) || isNaN(dot.y)) {
-					dot = performer.dots[performer.dots.length - 1];
-				}
-
-				if(Math.abs(dot.x) > maxX){
-					maxX = Math.abs(dot.x);
-				}
-
-				if(dot.y > maxY){
-					maxY = dot.y;
-				}
-				
-				performer.dots.push(dot);
-				i++;
-			}
-
-			//yum - maybe these shouldn't be CONSTANT_CASE
-			NUM_MARKERS = Math.ceil(maxX / STEPS_PER_MARKER) * 2;
-			FIELD_WIDTH = NUM_MARKERS * STEPS_PER_MARKER;
-			FIELD_HEIGHT = maxY + 4 + PIT_BOX;
-
-			canvas.resize(FIELD_WIDTH, FIELD_HEIGHT);
-
-			resize();
-		}
 	</script>
 
 </html>
