@@ -78,7 +78,8 @@ class Canvas {
 	drawText(text, x, y, { 
 		colour = null, 
 		alignment = null, 
-		font = null 
+		font = null,
+		maxWidth = null
 	} = {}) {
 		if (colour != null) {
 			this.setFill(colour);
@@ -92,6 +93,9 @@ class Canvas {
 			this.setFont(font);
 		}
 
-		this.#ctx.fillText(text, x * this.#scale, (y * this.#scale) + 1.5);
+		maxWidth = (maxWidth) ? maxWidth * this.#scale : undefined;
+		console.log(`MaxWidth: ${maxWidth}`);
+
+		this.#ctx.fillText(text, x * this.#scale, (y * this.#scale) + 1.5, maxWidth);
 	}
 }

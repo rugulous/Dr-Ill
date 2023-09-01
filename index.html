@@ -63,7 +63,7 @@
 		loader.load().then(s => {
 			NUM_MARKERS = Math.ceil(s.width / STEPS_PER_MARKER) * 2;
 			FIELD_WIDTH = NUM_MARKERS * STEPS_PER_MARKER;
-			FIELD_HEIGHT = s.height + 4 + PIT_BOX;
+			FIELD_HEIGHT = s.height + 6 + PIT_BOX;
 
 			show = s;
 
@@ -102,6 +102,9 @@
 			});
 
 			canvas.setFill("#FFF");
+
+			canvas.drawText(show.name, 1, 4, {alignment: "left", colour: "#FFF"});
+			canvas.drawText(`${show.bpm} bpm`, FIELD_WIDTH - 1, 4, {alignment: "right"});
 		}
 
 		function drawSet(set) {
@@ -113,7 +116,7 @@
 					return;
 				}
 
-				canvas.drawText(p.symbol, p.dots[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + p.dots[set].y), { alignment: "center" });
+				canvas.drawText(p.symbol, p.dots[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + p.dots[set].y), { alignment: "center", maxWidth: 3 });
 			});
 
 		}
