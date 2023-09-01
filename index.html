@@ -103,8 +103,8 @@
 
 			canvas.setFill("#FFF");
 
-			canvas.drawText(show.name, 1, 4, {alignment: "left", colour: "#FFF"});
-			canvas.drawText(`${show.bpm} bpm`, FIELD_WIDTH - 1, 4, {alignment: "right"});
+			canvas.drawText(show.name, 1, 4, { alignment: "left", colour: "#FFF" });
+			canvas.drawText(`${show.bpm} bpm`, FIELD_WIDTH - 1, 4, { alignment: "right" });
 		}
 
 		function drawSet(set, progress = 0) {
@@ -117,7 +117,7 @@
 				}
 
 				let nextX, nextY;
-				if(p.dots.length > set + 1){
+				if (p.dots.length > set + 1) {
 					nextX = p.dots[set + 1].x;
 					nextY = p.dots[set + 1].y;
 				} else {
@@ -187,24 +187,23 @@
 		let animStart = null;
 		let totalAnimCounts = -1;
 		let animCount = 0;
+		let queuedPause = false;
 
 		window.addEventListener("resize", resize);
 		window.addEventListener("keydown", ev => {
 			if (ev.key == "ArrowLeft" && currentSet > 0 && !isAnimating) {
-				currentSet--;
-				setXOffset += show.sets[currentSet].counts;
+				previousSet();
 			} else if (ev.key == "ArrowRight" && currentSet < show.sets.length - 1 && !isAnimating) {
-				setXOffset -= show.sets[currentSet].counts;
-				currentSet++;
+				nextSet();
 			} else if (ev.key == "g") {
 				showGrid = !showGrid;
 				localStorage.setItem("showGrid", showGrid);
-			} else if(ev.key == " " && !isAnimating){
-				isAnimating = true;
-				totalAnimCounts = (show.sets[currentSet].counts * (60/ show.bpm)) * 1000;
-				console.log(`${show.sets[currentSet].counts} @ ${show.bpm} = ${totalAnimCounts} milliseconds`);
-				animCount = 0;
-				animStart = null;
+			} else if (ev.key == " ") {
+				if (isAnimating) {
+					queuedPause = true;
+				}
+
+				calculateNextAnimation();
 				window.requestAnimationFrame(animate);
 			} else {
 				return;
@@ -213,26 +212,45 @@
 			draw();
 		});
 
-		function animate(delta){
-			if(animStart == null){
+		function animate(delta) {
+			if (animStart == null) {
 				animStart = delta;
 			}
 
 			const duration = Math.floor(delta - animStart);
 			const progress = Math.min(duration / totalAnimCounts, 1);
 
-			//console.log(animStart);
-			console.log(duration);
-			console.log(progress);
-			//console.log(totalAnimCounts);
-
 			draw(progress);
 
-			if(duration < totalAnimCounts){
-				window.requestAnimationFrame(animate);
-			} else {
-				isAnimating = false;
+			if (duration >= totalAnimCounts) {
+				nextSet();
+
+				if (queuedPause || currentSet == show.sets.length - 1) {
+					isAnimating = false;
+					return;
+				} else {
+					calculateNextAnimation();
+				}
 			}
+
+			window.requestAnimationFrame(animate);
+		}
+
+		function nextSet() {
+			setXOffset -= show.sets[currentSet].counts;
+			currentSet++;
+		}
+
+		function previousSet() {
+			currentSet--;
+			setXOffset += show.sets[currentSet].counts;
+		}
+
+		function calculateNextAnimation() {
+			isAnimating = true;
+			totalAnimCounts = (show.sets[currentSet].counts * (60 / show.bpm)) * 1000;
+			animCount = 0;
+			animStart = null;
 		}
 	</script>
 
