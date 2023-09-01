@@ -190,6 +190,61 @@
 		resize();
 
 		fetch("sample.drill").then(res => res.text()).then(processDrill);
+
+		fetch("all.drill").then(res => res.text()).then(processAllDrill);
+
+		const show = {
+			name: "",
+			bpm: 0,
+			sets: [],
+			performers: []
+		};
+
+		function processAllDrill(text){
+			const lines = text.split("\r\n");
+			show.name = lines[0];
+			show.bpm = parseInt(lines[1]);
+
+			let i;
+			for(i = 2; i < lines.length; i+=2){
+				if(lines[i] == "-----"){
+					console.log("Found terminator - breaking");
+					break;
+				}
+
+				show.sets.push({
+					identifier: lines[i],
+					counts: parseInt(lines[i + 1])
+				});
+			}
+
+			let performer = null;
+			while(i < lines.length - 2){
+				if(lines[i] == "-----"){
+					if(performer != null){
+						show.performers.push(performer);
+					}
+
+					performer = {
+						name: lines[i + 1],
+						symbol: lines[i + 2],
+						dots: []
+					};
+
+					i += 3;
+					continue;
+				}
+
+				const coords = lines[i + 2].split(",");
+				performer.dots.push({
+					x: parseFloat(coords[0]) * -1,
+					y: parseFloat(coords[1])
+				});
+				i++;
+			}
+
+			console.log(show);
+		}
 	</script>
 
 </html>
