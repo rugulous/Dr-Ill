@@ -30,19 +30,27 @@
 	<script src="Canvas.js"></script>
 
 	<script>
-		const FIELD_WIDTH = 160;
-		const FIELD_HEIGHT = 90.6;
-		const PIT_BOX = 5.33333;
+		const NUM_MARKERS = 14;
 		const STEPS_PER_MARKER = 8;
+		const FIELD_WIDTH = NUM_MARKERS * STEPS_PER_MARKER;
+		const FIELD_HEIGHT = 50.6;
+		const PIT_BOX = 5.33333;
 		const FRONT_HASH = 32 + PIT_BOX;
 		const BACK_HASH = 53.33333 + PIT_BOX;
 		const font = "sans-serif";
 
 		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
-		let performer = null;
 		let currentSet = 0;
 		let showGrid = JSON.parse(localStorage.getItem("showGrid"));
 		let setXOffset = 0;
+
+		const show = {
+			name: "",
+			bpm: 0,
+			sets: [],
+			performers: []
+		};
+
 
 		function resize() {
 			scale = getScale();
@@ -53,29 +61,16 @@
 		function draw() {
 			drawField();
 
-			if (performer != null) {
-				drawShow();
-
-				let setIndex = currentSet;
-				if (performer.sets[currentSet].isSubset) {
-					while (true) {
-						setIndex--;
-						if (!performer.sets[setIndex].isSubset) {
-							break;
-						}
-					}
-				}
-
-				drawSet(setIndex);
-			}
+			drawShow();
+			drawSet(currentSet);
 		}
 
-		function drawShow(){
+		function drawShow() {
 			let startX = setXOffset;
 			canvas.setTextAlign("center");
 			canvas.setFont(`${scale * 1.5}px ${font}`);
-			performer.sets.forEach((set, i) => {
-				const width = (i == performer.sets.length - 1) ? FIELD_WIDTH : set.counts;
+			show.sets.forEach((set, i) => {
+				const width = (i == show.sets.length - 1) ? FIELD_WIDTH : set.counts;
 
 				canvas.drawRect(startX, 0, width, 3, (startX == 0 ? "#FFF" : "rgba(255, 255, 255, 0.6)"));
 				canvas.strokeRect(startX, 0, width, 3, "#000");
@@ -88,8 +83,16 @@
 
 		function drawSet(set) {
 			canvas.setFill("#F00");
-			canvas.setFont(`bold ${scale * 2}px ${font}`);
-			canvas.drawText(performer.symbol, performer.sets[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + performer.sets[set].y), { alignment: "center" });
+			canvas.setFont(`bold ${scale * 1.5}px ${font}`);
+
+			show.performers.forEach(p => {
+				if (p.dots.length < set) {
+					return;
+				}
+
+				canvas.drawText(p.symbol, p.dots[set].x + (FIELD_WIDTH / 2), FIELD_HEIGHT - (PIT_BOX + p.dots[set].y), { alignment: "center" });
+			});
+
 		}
 
 		function drawField() {
@@ -118,8 +121,8 @@
 				canvas.setFill("#FFF");
 			}
 
-			for (let i = 0; i <= 20; i++) {
-				canvas.drawRect(i * STEPS_PER_MARKER, 0, (i == 10 ? 0.3333 : 0.1), FIELD_HEIGHT - PIT_BOX);
+			for (let i = 0; i <= NUM_MARKERS; i++) {
+				canvas.drawRect(i * STEPS_PER_MARKER, 0, (i == NUM_MARKERS / 2 ? 0.3333 : 0.1), FIELD_HEIGHT - PIT_BOX);
 
 				const yardLine = (i * STEPS_PER_MARKER) - 2;
 
@@ -142,42 +145,15 @@
 			return Math.min(w, h);
 		}
 
-		function processDrill(text) {
-			const drill = text.split("\r\n");
-			performer = {
-				name: drill[0],
-				symbol: drill[1],
-				sets: []
-			};
-
-			for (let i = 2; i < drill.length - 1; i += 3) {
-				const set = {
-					identifier: drill[i],
-					counts: parseInt(drill[i + 1]),
-					isSubset: drill[i + 2] == "-"
-				};
-
-				if (!set.isSubset) {
-					const coords = drill[i + 2].split(",");
-					set.x = parseFloat(coords[0]) * -1;
-					set.y = parseFloat(coords[1]);
-				}
-
-				performer.sets.push(set);
-			}
-
-			draw();
-		}
-
 		window.addEventListener("resize", resize);
 		window.addEventListener("keydown", ev => {
 			if (ev.key == "ArrowLeft" && currentSet > 0) {
 				currentSet--;
-				setXOffset += performer.sets[currentSet].counts;
-			} else if (ev.key == "ArrowRight" && currentSet < performer?.sets.length - 1) {
-				setXOffset -= performer.sets[currentSet].counts;
+				setXOffset += show.sets[currentSet].counts;
+			} else if (ev.key == "ArrowRight" && currentSet < show.sets.length - 1) {
+				setXOffset -= show.sets[currentSet].counts;
 				currentSet++;
-			} else if(ev.key == "g"){
+			} else if (ev.key == "g") {
 				showGrid = !showGrid;
 				localStorage.setItem("showGrid", showGrid);
 			} else {
@@ -189,26 +165,16 @@
 
 		resize();
 
-		fetch("sample.drill").then(res => res.text()).then(processDrill);
-
 		fetch("all.drill").then(res => res.text()).then(processAllDrill);
 
-		const show = {
-			name: "",
-			bpm: 0,
-			sets: [],
-			performers: []
-		};
-
-		function processAllDrill(text){
+		function processAllDrill(text) {
 			const lines = text.split("\r\n");
 			show.name = lines[0];
 			show.bpm = parseInt(lines[1]);
 
 			let i;
-			for(i = 2; i < lines.length; i+=2){
-				if(lines[i] == "-----"){
-					console.log("Found terminator - breaking");
+			for (i = 2; i < lines.length; i += 2) {
+				if (lines[i] == "-----") {
 					break;
 				}
 
@@ -219,9 +185,9 @@
 			}
 
 			let performer = null;
-			while(i < lines.length - 2){
-				if(lines[i] == "-----"){
-					if(performer != null){
+			while (i < lines.length - 2) {
+				if (lines[i] == "-----") {
+					if (performer != null) {
 						show.performers.push(performer);
 					}
 
@@ -236,14 +202,20 @@
 				}
 
 				const coords = lines[i + 2].split(",");
-				performer.dots.push({
+				let dot = {
 					x: parseFloat(coords[0]) * -1,
 					y: parseFloat(coords[1])
-				});
+				};
+
+				if (isNaN(dot.x) || isNaN(dot.y)) {
+					dot = performer.dots[performer.dots.length - 1];
+				}
+
+				performer.dots.push(dot);
 				i++;
 			}
 
-			console.log(show);
+			draw();
 		}
 	</script>
 
