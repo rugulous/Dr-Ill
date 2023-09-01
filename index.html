@@ -140,8 +140,8 @@
 		}
 
 		function getScale() {
-			const w = Math.floor(window.innerHeight / FIELD_HEIGHT);
-			const h = Math.floor(window.innerWidth / FIELD_WIDTH);
+			const w = Math.floor(window.innerWidth / FIELD_WIDTH);
+			const h = Math.floor(window.innerHeight / FIELD_HEIGHT);
 			return Math.min(w, h);
 		}
 
@@ -164,6 +164,8 @@
 		});
 
 		resize();
+		
+		setTimeout(resize, 10);
 
 		const params = new URLSearchParams(window.location.search);
 		const fileToLoad = params.get("piece");
