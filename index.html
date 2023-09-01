@@ -35,6 +35,7 @@
 		const STEPS_PER_MARKER = 8;
 		let FIELD_WIDTH = NUM_MARKERS * STEPS_PER_MARKER;
 		let FIELD_HEIGHT = 60.6;
+		const ACTUAL_FIELD_HEIGHT = 90.6;
 		const PIT_BOX = 5.33333;
 		const FRONT_HASH = 32 + PIT_BOX;
 		const BACK_HASH = 53.33333 + PIT_BOX;
@@ -144,14 +145,17 @@
 					canvas.drawRect(x, 0, 0.1, FIELD_HEIGHT - PIT_BOX);
 				}
 
-				for (let y = FIELD_HEIGHT - PIT_BOX; y > 0; y--) {
-					if (Math.floor(y - 1) % 4 == 0) {
+				const endPoint = FIELD_HEIGHT - PIT_BOX;
+				const modifier = endPoint % 4;
+				for (let y = endPoint; y > 0; y--) {
+					const calcY = Math.floor(y - modifier);
+					if (calcY % 4 == 0) {
 						canvas.setFill("rgba(200, 200, 200, 0.6)");
 					}
 
 					canvas.drawRect(0, y, FIELD_WIDTH, 0.1);
 
-					if (Math.floor(y - 1) % 4 == 0) {
+					if (calcY % 4 == 0) {
 						canvas.setFill("rgba(200, 200, 200, 0.3)");
 					}
 				}
