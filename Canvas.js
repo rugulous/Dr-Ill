@@ -50,6 +50,10 @@ class Canvas {
 		this.#ctx.fillStyle = fill;
 	}
 
+	clear(){
+		this.#ctx.clearRect(0, 0, this.#el.width, this.#el.height);
+	}
+
 	drawRect(x, y, w, h, colour = null) {
 		if (colour != null) {
 			this.setFill(colour);

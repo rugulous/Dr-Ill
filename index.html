@@ -20,10 +20,16 @@
 				justify-content: center;
 				align-items: center;
 			}
+
+			#field{
+				position: absolute;
+				z-index: -1;
+			}
 		</style>
 	</head>
 
 	<body>
+		<canvas id="field"></canvas>
 		<canvas id="canvas"></canvas>
 	</body>
 
@@ -42,10 +48,12 @@
 		const font = "sans-serif";
 
 		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
+		const fieldCanvas = new Canvas("field", FIELD_WIDTH, FIELD_HEIGHT);
 		let currentSet = 0;
 		let showGrid = JSON.parse(localStorage.getItem("showGrid"));
 		let setXOffset = 0;
 		let scale = 0;
+		let renderField = false;
 
 		let show = {
 			name: "",
@@ -76,15 +84,21 @@
 
 			if (width != null && height != null) {
 				canvas.resize(width, height, scale);
+				fieldCanvas.resize(width, height, scale);
 			} else {
 				canvas.setScale(scale);
+				fieldCanvas.setScale(scale);
 			}
-			draw();
+			draw(true);
 		}
 
-		function draw(delta = 0) {
-			drawField();
+		function draw(all = false, delta = 0) {
+			if(all || renderField){
+				drawField();
+				renderField = false;
+			}
 
+			canvas.clear();
 			drawShow(delta);
 			drawSet(currentSet, delta);
 		}
@@ -135,14 +149,14 @@
 		}
 
 		function drawField() {
-			canvas.drawRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT, "#008000");
-			canvas.drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, PIT_BOX, "#006400");
-			canvas.drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, 1 / scale, "#FFF");
+			fieldCanvas.drawRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT, "#008000");
+			fieldCanvas.drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, PIT_BOX, "#006400");
+			fieldCanvas.drawRect(0, FIELD_HEIGHT - PIT_BOX, FIELD_WIDTH, 1 / scale, "#FFF");
 
 			if (showGrid) {
-				canvas.setFill("rgba(200, 200, 200, 0.3)");
+				fieldCanvas.setFill("rgba(200, 200, 200, 0.3)");
 				for (let x = 0; x < FIELD_WIDTH; x++) {
-					canvas.drawRect(x, 0, 0.1, FIELD_HEIGHT - PIT_BOX);
+					fieldCanvas.drawRect(x, 0, 0.1, FIELD_HEIGHT - PIT_BOX);
 				}
 
 				const endPoint = FIELD_HEIGHT - PIT_BOX;
@@ -150,34 +164,34 @@
 				for (let y = endPoint; y > 0; y--) {
 					const calcY = Math.floor(y - modifier);
 					if (calcY % 4 == 0) {
-						canvas.setFill("rgba(200, 200, 200, 0.6)");
+						fieldCanvas.setFill("rgba(200, 200, 200, 0.6)");
 					}
 
-					canvas.drawRect(0, y, FIELD_WIDTH, 0.1);
+					fieldCanvas.drawRect(0, y, FIELD_WIDTH, 0.1);
 
 					if (calcY % 4 == 0) {
-						canvas.setFill("rgba(200, 200, 200, 0.3)");
+						fieldCanvas.setFill("rgba(200, 200, 200, 0.3)");
 					}
 				}
 
-				canvas.setFill("#FFF");
+				fieldCanvas.setFill("#FFF");
 			}
 
 			for (let i = 0; i <= NUM_MARKERS; i++) {
-				canvas.drawRect(i * STEPS_PER_MARKER, 0, (i == NUM_MARKERS / 2 ? 0.3333 : 0.1), FIELD_HEIGHT - PIT_BOX);
+				fieldCanvas.drawRect(i * STEPS_PER_MARKER, 0, (i == NUM_MARKERS / 2 ? 0.3333 : 0.1), FIELD_HEIGHT - PIT_BOX);
 
 				const yardLine = (i * STEPS_PER_MARKER) - 2;
 
-				canvas.drawRect(yardLine, FIELD_HEIGHT - FRONT_HASH, 4, 0.1);
-				canvas.drawRect(yardLine, FIELD_HEIGHT - BACK_HASH, 4, 0.1);
+				fieldCanvas.drawRect(yardLine, FIELD_HEIGHT - FRONT_HASH, 4, 0.1);
+				fieldCanvas.drawRect(yardLine, FIELD_HEIGHT - BACK_HASH, 4, 0.1);
 
 				for (let j = 1; j < STEPS_PER_MARKER; j++) {
-					canvas.drawRect((i * STEPS_PER_MARKER) + j, FIELD_HEIGHT - PIT_BOX - 1, 0.1, 1);
+					fieldCanvas.drawRect((i * STEPS_PER_MARKER) + j, FIELD_HEIGHT - PIT_BOX - 1, 0.1, 1);
 				}
 			}
 
 			for (let i = 0; i < 7; i++) {
-				canvas.drawCircle(FIELD_WIDTH / 2, FIELD_HEIGHT - (PIT_BOX + (i * STEPS_PER_MARKER)), 0.33333);
+				fieldCanvas.drawCircle(FIELD_WIDTH / 2, FIELD_HEIGHT - (PIT_BOX + (i * STEPS_PER_MARKER)), 0.33333);
 			}
 		}
 
@@ -202,6 +216,7 @@
 			} else if (ev.key == "g") {
 				showGrid = !showGrid;
 				localStorage.setItem("showGrid", showGrid);
+				renderField = true;
 			} else if (ev.key == " ") {
 				if (isAnimating) {
 					queuedPause = true;
@@ -214,7 +229,9 @@
 				return;
 			}
 
-			draw();
+			if(!isAnimating){
+				draw();
+			}
 		});
 
 		const targetFPS = 1000 / 30; //30 FPS
@@ -229,7 +246,7 @@
 			const progress = Math.min(duration / totalAnimCounts, 1);
 
 			if(delta - lastTick > targetFPS){
-				draw(progress);
+				draw(renderField, progress);
 				lastTick = delta;
 			}
 
