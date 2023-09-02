@@ -21,7 +21,7 @@
 				align-items: center;
 			}
 
-			#field{
+			#field {
 				position: absolute;
 				z-index: -1;
 			}
@@ -29,8 +29,10 @@
 	</head>
 
 	<body>
-		<canvas id="field"></canvas>
-		<canvas id="canvas"></canvas>
+		<div>
+			<canvas id="field"></canvas>
+			<canvas id="canvas"></canvas>
+		</div>
 	</body>
 
 	<script src="Canvas.js"></script>
@@ -46,6 +48,19 @@
 		const FRONT_HASH = 32 + PIT_BOX;
 		const BACK_HASH = 53.33333 + PIT_BOX;
 		const font = "sans-serif";
+		let isFullScreen = false;
+
+		document.getElementById("canvas").addEventListener("click", () => {
+			if(isFullScreen){
+				return;
+			}
+
+			document.body.requestFullscreen();
+			resize(true);
+			isFullScreen = true;
+		});
+
+		document.body.addEventListener("fullscreenchange", () => isFullScreen = !!document.fullscreenElement);
 
 		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
 		const fieldCanvas = new Canvas("field", FIELD_WIDTH, FIELD_HEIGHT);
@@ -81,7 +96,7 @@
 
 		function resize(width = null, height = null) {
 			scale = getScale();
-			
+
 			canvas.setFont(`${scale * 1.5}px ${font}`);
 
 			if (width != null && height != null) {
@@ -95,7 +110,7 @@
 		}
 
 		function draw(all = false, delta = 0) {
-			if(all || renderField){
+			if (all || renderField) {
 				drawField();
 				renderField = false;
 
@@ -107,7 +122,7 @@
 			drawSet(currentSet, delta);
 		}
 
-		function drawMeta(){
+		function drawMeta() {
 			fieldCanvas.setFont(`${scale * 1.5}px ${font}`);
 			fieldCanvas.drawText(show.name, 1, 4, { alignment: "left", colour: "#FFF" });
 			fieldCanvas.drawText(`${show.bpm} bpm`, FIELD_WIDTH - 1, 4, { alignment: "right" });
@@ -235,7 +250,7 @@
 				return;
 			}
 
-			if(!isAnimating){
+			if (!isAnimating) {
 				draw();
 			}
 		});
@@ -251,7 +266,7 @@
 			const duration = Math.floor(delta - animStart);
 			const progress = Math.min(duration / totalAnimCounts, 1);
 
-			if(delta - lastTick > targetFPS){
+			if (delta - lastTick > targetFPS) {
 				draw(renderField, progress);
 				lastTick = delta;
 			}

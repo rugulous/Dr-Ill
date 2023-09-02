@@ -8,8 +8,7 @@ class Canvas {
 	constructor(id, targetW, targetH) {
 		this.#el = document.getElementById(id);
 		this.#ctx = this.#el.getContext("2d");
-		this.#el.addEventListener("click", this.#el.requestFullscreen);
-
+		
 		this.#targetW = targetW;
 		this.#targetH = targetH;
 	}
