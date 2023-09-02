@@ -81,6 +81,8 @@
 
 		function resize(width = null, height = null) {
 			scale = getScale();
+			
+			canvas.setFont(`${scale * 1.5}px ${font}`);
 
 			if (width != null && height != null) {
 				canvas.resize(width, height, scale);
@@ -96,6 +98,8 @@
 			if(all || renderField){
 				drawField();
 				renderField = false;
+
+				drawMeta();
 			}
 
 			canvas.clear();
@@ -103,10 +107,15 @@
 			drawSet(currentSet, delta);
 		}
 
+		function drawMeta(){
+			fieldCanvas.setFont(`${scale * 1.5}px ${font}`);
+			fieldCanvas.drawText(show.name, 1, 4, { alignment: "left", colour: "#FFF" });
+			fieldCanvas.drawText(`${show.bpm} bpm`, FIELD_WIDTH - 1, 4, { alignment: "right" });
+		}
+
 		function drawShow(progress = 0) {
 			let startX = setXOffset - (show.sets[currentSet].counts * progress);
 			canvas.setTextAlign("center");
-			canvas.setFont(`${scale * 1.5}px ${font}`);
 			show.sets.forEach((set, i) => {
 				const width = (i == show.sets.length - 1) ? FIELD_WIDTH : set.counts;
 
@@ -117,9 +126,6 @@
 			});
 
 			canvas.setFill("#FFF");
-
-			canvas.drawText(show.name, 1, 4, { alignment: "left", colour: "#FFF" });
-			canvas.drawText(`${show.bpm} bpm`, FIELD_WIDTH - 1, 4, { alignment: "right" });
 		}
 
 		function drawSet(set, progress = 0) {
