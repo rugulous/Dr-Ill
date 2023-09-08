@@ -52,21 +52,33 @@
 
 		let assets = {
 			play: new Image(),
-			pause: new Image()
+			pause: new Image(),
+			grid: new Image(),
+			next: new Image(),
+			prev: new Image()
 		};
-		assets.play.src = "assets/play-circle-fill.svg";
+		assets.play.src = "assets/play-fill.svg";
 		assets.play.onload = function(){
 			if(!isAnimating){
 				queueRender(true);
 			}
 		};
 
-		assets.pause.src = "assets/pause-circle-fill.svg";
+		assets.pause.src = "assets/pause-fill.svg";
 		assets.pause.onload = function(){
 			if(isAnimating){
 				queueRender(true);	
 			}
 		}
+
+		assets.grid.src = "assets/border-all.svg";
+		assets.grid.onload =  () => queueRender(true);
+
+		assets.next.src = "assets/skip-end-fill.svg";
+		assets.next.onload = () => queueRender(true);
+
+		assets.prev.src = "assets/skip-start-fill.svg";
+		assets.prev.onload =  () => queueRender(true);
 
 		document.getElementById("canvas").addEventListener("click", () => {
 			if(isFullScreen){
@@ -247,11 +259,21 @@
 		}
 
 		function drawUI(){
+			fieldCanvas.drawCircle(3.75, FIELD_HEIGHT - 2.6, 2);
 			if(isAnimating){
-				fieldCanvas.drawImage(assets.pause, 3, FIELD_HEIGHT - 4.5, 4);
+				fieldCanvas.drawImage(assets.pause, 2.75, FIELD_HEIGHT - 4.5, 4);
 			} else {
 				fieldCanvas.drawImage(assets.play, 3, FIELD_HEIGHT - 4.5, 4);
 			}
+
+			fieldCanvas.drawCircle(8.75, FIELD_HEIGHT - 2.6, 2);
+			fieldCanvas.drawImage(assets.grid, 8.5, FIELD_HEIGHT - 3.8, 2.5);
+
+			fieldCanvas.drawCircle(FIELD_WIDTH - 3.75, FIELD_HEIGHT - 2.6, 2);
+			fieldCanvas.drawImage(assets.next, FIELD_WIDTH - 4.75, FIELD_HEIGHT - 4.5, 4);
+
+			fieldCanvas.drawCircle(FIELD_WIDTH - 8.75, FIELD_HEIGHT - 2.6, 2);
+			fieldCanvas.drawImage(assets.prev, FIELD_WIDTH - 9.75, FIELD_HEIGHT - 4.5, 4);
 		}
 
 		function getScale() {
