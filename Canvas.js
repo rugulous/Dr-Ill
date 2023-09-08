@@ -102,19 +102,14 @@ class Canvas {
 	}
 
 	drawImage(src, x, y, w, h){
-		if(h !== undefined){
-			h *= this.#scale;
+		if(w != undefined && h == undefined){
+			h = w;
 		}
 
-		if(w !== undefined){
-			w *= this.#scale;
+		w ??= src.width;
+		h ??= src.height;
 
-			if(h === undefined){
-				h = w;
-			}
-		}
-
-		this.#ctx.drawImage(src, x * this.#scale, y * this.#scale, w, h);
+		this.#ctx.drawImage(src, x * this.#scale, (y - (h / 2)) * this.#scale, w * this.#scale, h * this.#scale);
 	}
 
 	getPosition(x, y){

@@ -37,6 +37,7 @@
 
 	<script src="Canvas.js"></script>
 	<script src="DrillLoader.js"></script>
+	<script src="UIElement.js"></script>
 
 	<script>
 		let NUM_MARKERS = 14;
@@ -50,52 +51,26 @@
 		const font = "sans-serif";
 		let isFullScreen = false;
 
+		const UI_HEIGHT = FIELD_HEIGHT - 12;
+
 		let assets = {
-			play: new Image(),
-			pause: new Image(),
-			grid: new Image(),
-			next: new Image(),
-			prev: new Image()
+			play: new UIElement("assets/play-fill.svg", 3, UI_HEIGHT, 4, () => {
+				if(!isAnimating){
+					queueRender(true);
+				}
+			}),
+			pause: new UIElement("assets/pause-fill.svg", 3, UI_HEIGHT, 4, () => {
+				if(isAnimating){
+					queueRender(true);
+				}
+			}),
+			grid: new UIElement("assets/border-all.svg", 8, UI_HEIGHT, 4, () => queueRender(true)),
+			next: new UIElement("assets/skip-end-fill.svg", FIELD_WIDTH - 3, UI_HEIGHT, 4, () => queueRender(true)),
+			prev: new UIElement("assets/skip-start-fill.svg", FIELD_WIDTH - 8, UI_HEIGHT, 4, () => queueRender(true))
 		};
-		assets.play.src = "assets/play-fill.svg";
-		assets.play.onload = function(){
-			if(!isAnimating){
-				queueRender(true);
-			}
-		};
-
-		assets.pause.src = "assets/pause-fill.svg";
-		assets.pause.onload = function(){
-			if(isAnimating){
-				queueRender(true);	
-			}
-		}
-
-		assets.grid.src = "assets/border-all.svg";
-		assets.grid.onload =  () => queueRender(true);
-
-		assets.next.src = "assets/skip-end-fill.svg";
-		assets.next.onload = () => queueRender(true);
-
-		assets.prev.src = "assets/skip-start-fill.svg";
-		assets.prev.onload =  () => queueRender(true);
-
-		/*document.getElementById("canvas").addEventListener("click", () => {
-			if(isFullScreen){
-				return;
-			}
-
-			document.body.requestFullscreen();
-			resize(true);
-			isFullScreen = true;
-		});
-
-		document.body.addEventListener("fullscreenchange", () => isFullScreen = !!document.fullscreenElement);*/
 
 		document.getElementById("canvas").addEventListener("mousemove", e => {
 			const pos = canvas.getPosition(e.x, e.y);
-			console.log(pos);
-			//document.title = `${e.x}, ${e.y}`;
 		});
 
 		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
@@ -136,6 +111,9 @@
 			if (width != null && height != null) {
 				canvas.resize(width, height, scale);
 				fieldCanvas.resize(width, height, scale);
+
+				assets.next.x = width - 5;
+				assets.prev.x = width - 10;
 			} else {
 				canvas.setScale(scale);
 				fieldCanvas.setScale(scale);
@@ -272,22 +250,37 @@
 			draw(all);
 		}
 
+		function drawUIElement(el){
+			fieldCanvas.drawCircle(el.x, el.y, el.size / 2);
+			fieldCanvas.drawImage(el.image, el.x, el.y, el.size / 2);
+		}
+
 		function drawUI(){
-			fieldCanvas.drawCircle(3.75, FIELD_HEIGHT - 2.6, 2);
+			/*fieldCanvas.drawCircle(3.75, FIELD_HEIGHT - 2.6, 2);
 			if(isAnimating){
-				fieldCanvas.drawImage(assets.pause, 2.75, FIELD_HEIGHT - 4.5, 4);
+				fieldCanvas.drawImage(assets.pause.image, 3.75, FIELD_HEIGHT - 4.5, 4);
 			} else {
-				fieldCanvas.drawImage(assets.play, 3, FIELD_HEIGHT - 4.5, 4);
+				fieldCanvas.drawImage(assets.play.image, 3.75, FIELD_HEIGHT - 4.5, 4);
 			}
 
 			fieldCanvas.drawCircle(8.75, FIELD_HEIGHT - 2.6, 2);
-			fieldCanvas.drawImage(assets.grid, 8.5, FIELD_HEIGHT - 3.8, 2.5);
+			fieldCanvas.drawImage(assets.grid.image, 8.5, FIELD_HEIGHT - 3.8, 2.5);
 
 			fieldCanvas.drawCircle(FIELD_WIDTH - 3.75, FIELD_HEIGHT - 2.6, 2);
-			fieldCanvas.drawImage(assets.next, FIELD_WIDTH - 4.75, FIELD_HEIGHT - 4.5, 4);
+			fieldCanvas.drawImage(assets.next.image, FIELD_WIDTH - 4.75, FIELD_HEIGHT - 4.5, 4);
 
 			fieldCanvas.drawCircle(FIELD_WIDTH - 8.75, FIELD_HEIGHT - 2.6, 2);
-			fieldCanvas.drawImage(assets.prev, FIELD_WIDTH - 9.75, FIELD_HEIGHT - 4.5, 4);
+			fieldCanvas.drawImage(assets.prev.image, FIELD_WIDTH - 9.75, FIELD_HEIGHT - 4.5, 4);*/
+
+			if(isAnimating){
+				drawUIElement(assets.pause);
+			} else {
+				drawUIElement(assets.play);
+			}
+
+			drawUIElement(assets.grid);
+			drawUIElement(assets.prev);
+			drawUIElement(assets.next);
 		}
 
 		function getScale() {
