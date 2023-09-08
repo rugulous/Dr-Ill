@@ -80,7 +80,7 @@
 		assets.prev.src = "assets/skip-start-fill.svg";
 		assets.prev.onload =  () => queueRender(true);
 
-		document.getElementById("canvas").addEventListener("click", () => {
+		/*document.getElementById("canvas").addEventListener("click", () => {
 			if(isFullScreen){
 				return;
 			}
@@ -90,7 +90,13 @@
 			isFullScreen = true;
 		});
 
-		document.body.addEventListener("fullscreenchange", () => isFullScreen = !!document.fullscreenElement);
+		document.body.addEventListener("fullscreenchange", () => isFullScreen = !!document.fullscreenElement);*/
+
+		document.getElementById("canvas").addEventListener("mousemove", e => {
+			const pos = canvas.getPosition(e.x, e.y);
+			console.log(pos);
+			//document.title = `${e.x}, ${e.y}`;
+		});
 
 		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
 		const fieldCanvas = new Canvas("field", FIELD_WIDTH, FIELD_HEIGHT);
@@ -161,6 +167,10 @@
 		}
 
 		function drawShow(progress = 0) {
+			if(show.sets.length <= currentSet){
+				return;
+			}
+
 			let startX = setXOffset - (show.sets[currentSet].counts * progress);
 			canvas.setTextAlign("center");
 			show.sets.forEach((set, i) => {
@@ -176,6 +186,10 @@
 		}
 
 		function drawSet(set, progress = 0) {
+			if(show.sets.length == 0){
+				return; 
+			}
+
 			canvas.setFill("#F00");
 
 			show.performers.forEach(p => {

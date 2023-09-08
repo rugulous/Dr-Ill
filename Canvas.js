@@ -116,4 +116,12 @@ class Canvas {
 
 		this.#ctx.drawImage(src, x * this.#scale, y * this.#scale, w, h);
 	}
+
+	getPosition(x, y){
+		const rect = this.#el.getBoundingClientRect();
+		return {
+			x: (x - rect.left) / this.#scale,
+			y: (y - rect.top) / this.#scale
+		};
+	}
 }
