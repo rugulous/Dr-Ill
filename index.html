@@ -55,7 +55,18 @@
 			pause: new Image()
 		};
 		assets.play.src = "assets/play-circle-fill.svg";
+		assets.play.onload = function(){
+			if(!isAnimating){
+				queueRender(true);
+			}
+		};
+
 		assets.pause.src = "assets/pause-circle-fill.svg";
+		assets.pause.onload = function(){
+			if(isAnimating){
+				queueRender(true);	
+			}
+		}
 
 		document.getElementById("canvas").addEventListener("click", () => {
 			if(isFullScreen){
@@ -114,7 +125,7 @@
 			
 			canvas.setFont(`bold ${scale * 1.5}px ${font}`);
 			
-			draw(true);
+			queueRender(true);
 		}
 
 		function draw(all = false, delta = 0) {
@@ -224,6 +235,17 @@
 			}
 		}
 
+		function queueRender(all){
+			all ??= renderField;
+
+			if(isAnimating){
+				renderField = all;
+				return;
+			}
+
+			draw(all);
+		}
+
 		function drawUI(){
 			if(isAnimating){
 				fieldCanvas.drawImage(assets.pause, 3, FIELD_HEIGHT - 4.5, 4);
@@ -260,15 +282,14 @@
 					return;
 				}
 
+				renderField = true;
 				calculateNextAnimation();
 				window.requestAnimationFrame(animate);
 			} else {
 				return;
 			}
 
-			if (!isAnimating) {
-				draw();
-			}
+			queueRender();
 		});
 
 		const targetFPS = 1000 / 30; //30 FPS
@@ -293,7 +314,7 @@
 
 				if (queuedPause || currentSet == show.sets.length - 1) {
 					isAnimating = false;
-					draw();
+					draw(true);
 					return;
 				} else {
 					calculateNextAnimation(delta);
