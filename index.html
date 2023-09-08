@@ -96,9 +96,7 @@
 
 		function resize(width = null, height = null) {
 			scale = getScale();
-
-			canvas.setFont(`${scale * 1.5}px ${font}`);
-
+			
 			if (width != null && height != null) {
 				canvas.resize(width, height, scale);
 				fieldCanvas.resize(width, height, scale);
@@ -106,6 +104,9 @@
 				canvas.setScale(scale);
 				fieldCanvas.setScale(scale);
 			}
+			
+			canvas.setFont(`bold ${scale * 1.5}px ${font}`);
+			
 			draw(true);
 		}
 
@@ -145,7 +146,6 @@
 
 		function drawSet(set, progress = 0) {
 			canvas.setFill("#F00");
-			canvas.setFont(`bold ${scale * 1.5}px ${font}`);
 
 			show.performers.forEach(p => {
 				if (p.dots.length < set) {
