@@ -50,6 +50,13 @@
 		const font = "sans-serif";
 		let isFullScreen = false;
 
+		let assets = {
+			play: new Image(),
+			pause: new Image()
+		};
+		assets.play.src = "assets/play-circle-fill.svg";
+		assets.pause.src = "assets/pause-circle-fill.svg";
+
 		document.getElementById("canvas").addEventListener("click", () => {
 			if(isFullScreen){
 				return;
@@ -113,9 +120,10 @@
 		function draw(all = false, delta = 0) {
 			if (all || renderField) {
 				drawField();
-				renderField = false;
-
 				drawMeta();
+				drawUI();
+
+				renderField = false;
 			}
 
 			canvas.clear();
@@ -213,6 +221,14 @@
 
 			for (let i = 0; i < 7; i++) {
 				fieldCanvas.drawCircle(FIELD_WIDTH / 2, FIELD_HEIGHT - (PIT_BOX + (i * STEPS_PER_MARKER)), 0.33333);
+			}
+		}
+
+		function drawUI(){
+			if(isAnimating){
+				fieldCanvas.drawImage(assets.pause, 3, FIELD_HEIGHT - 4.5, 4);
+			} else {
+				fieldCanvas.drawImage(assets.play, 3, FIELD_HEIGHT - 4.5, 4);
 			}
 		}
 

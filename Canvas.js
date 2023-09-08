@@ -100,4 +100,20 @@ class Canvas {
 		maxWidth = (maxWidth) ? maxWidth * this.#scale : undefined;
 		this.#ctx.fillText(text, x * this.#scale, (y * this.#scale) + 1.5, maxWidth);
 	}
+
+	drawImage(src, x, y, w, h){
+		if(h !== undefined){
+			h *= this.#scale;
+		}
+
+		if(w !== undefined){
+			w *= this.#scale;
+
+			if(h === undefined){
+				h = w;
+			}
+		}
+
+		this.#ctx.drawImage(src, x * this.#scale, y * this.#scale, w, h);
+	}
 }
