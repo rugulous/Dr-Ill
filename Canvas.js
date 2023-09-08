@@ -74,6 +74,7 @@ class Canvas {
 			this.setFill(colour);
 		}
 
+		this.#ctx.beginPath();
 		this.#ctx.arc((x + (radius / 2)) * this.#scale, y * this.#scale, radius * this.#scale, 0, Math.PI * 2);
 		this.#ctx.fill();
 	}
