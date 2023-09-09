@@ -51,7 +51,7 @@
 		const font = "sans-serif";
 		let isFullScreen = false;
 
-		const UI_HEIGHT = FIELD_HEIGHT - 12;
+		let UI_HEIGHT = FIELD_HEIGHT - 2.5;
 
 		let assets = {
 			play: new UIElement("assets/play-fill.svg", 3, UI_HEIGHT, 4, () => {
@@ -71,6 +71,8 @@
 
 		document.getElementById("canvas").addEventListener("mousemove", e => {
 			const pos = canvas.getPosition(e.x, e.y);
+			const res = Object.keys(assets).find(x => assets[x].x - 2 < pos.x && assets[x].x + 2 > pos.x);
+			console.log(res);
 		});
 
 		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
@@ -105,6 +107,16 @@
 			resize(FIELD_WIDTH, FIELD_HEIGHT);
 		});
 
+		function placeAssets(width, height){
+			console.log("Placing assets...");
+			UI_HEIGHT = height - 2.5;
+
+			Object.keys(assets).forEach(a => assets[a].y = UI_HEIGHT);
+
+			assets.next.x = width - 5;
+			assets.prev.x = width - 10;
+		}
+
 		function resize(width = null, height = null) {
 			scale = getScale();
 			
@@ -112,8 +124,7 @@
 				canvas.resize(width, height, scale);
 				fieldCanvas.resize(width, height, scale);
 
-				assets.next.x = width - 5;
-				assets.prev.x = width - 10;
+				placeAssets(width, height);
 			} else {
 				canvas.setScale(scale);
 				fieldCanvas.setScale(scale);
