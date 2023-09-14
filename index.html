@@ -55,24 +55,32 @@
 
 		let assets = {
 			play: new UIElement("assets/play-fill.svg", 3, UI_HEIGHT, 4, () => {
-				if(!isAnimating){
+				if (!isAnimating) {
 					queueRender(true);
 				}
-			}),
+			}, togglePlay),
 			pause: new UIElement("assets/pause-fill.svg", 3, UI_HEIGHT, 4, () => {
-				if(isAnimating){
+				if (isAnimating) {
 					queueRender(true);
 				}
-			}),
-			grid: new UIElement("assets/border-all.svg", 8, UI_HEIGHT, 4, () => queueRender(true)),
-			next: new UIElement("assets/skip-end-fill.svg", FIELD_WIDTH - 3, UI_HEIGHT, 4, () => queueRender(true)),
-			prev: new UIElement("assets/skip-start-fill.svg", FIELD_WIDTH - 8, UI_HEIGHT, 4, () => queueRender(true))
+			}, togglePlay),
+			grid: new UIElement("assets/border-all.svg", 8, UI_HEIGHT, 4, () => queueRender(true), toggleGrid),
+			next: new UIElement("assets/skip-end-fill.svg", FIELD_WIDTH - 3, UI_HEIGHT, 4, () => queueRender(true), nextSet),
+			prev: new UIElement("assets/skip-start-fill.svg", FIELD_WIDTH - 8, UI_HEIGHT, 4, () => queueRender(true), previousSet)
 		};
 
-		document.getElementById("canvas").addEventListener("mousemove", e => {
+		document.getElementById("canvas").addEventListener("click", e => {
 			const pos = canvas.getPosition(e.x, e.y);
-			const res = Object.keys(assets).find(x => assets[x].x - 2 < pos.x && assets[x].x + 2 > pos.x);
-			console.log(res);
+			const res = Object.keys(assets).find(key => {
+				return (assets[key].x - (assets[key].size / 4) < pos.x && assets[key].x + (assets[key].size * 0.75) > pos.x)
+					&& (assets[key].y - (assets[key].size / 2) < pos.y && assets[key].y + (assets[key].size / 2) > pos.y)
+			});
+
+			if (!res) {
+				return;
+			}
+
+			assets[res].action();
 		});
 
 		const canvas = new Canvas("canvas", FIELD_WIDTH, FIELD_HEIGHT);
@@ -107,8 +115,7 @@
 			resize(FIELD_WIDTH, FIELD_HEIGHT);
 		});
 
-		function placeAssets(width, height){
-			console.log("Placing assets...");
+		function placeAssets(width, height) {
 			UI_HEIGHT = height - 2.5;
 
 			Object.keys(assets).forEach(a => assets[a].y = UI_HEIGHT);
@@ -119,7 +126,7 @@
 
 		function resize(width = null, height = null) {
 			scale = getScale();
-			
+
 			if (width != null && height != null) {
 				canvas.resize(width, height, scale);
 				fieldCanvas.resize(width, height, scale);
@@ -129,9 +136,9 @@
 				canvas.setScale(scale);
 				fieldCanvas.setScale(scale);
 			}
-			
+
 			canvas.setFont(`bold ${scale * 1.5}px ${font}`);
-			
+
 			queueRender(true);
 		}
 
@@ -156,7 +163,7 @@
 		}
 
 		function drawShow(progress = 0) {
-			if(show.sets.length <= currentSet){
+			if (show.sets.length <= currentSet) {
 				return;
 			}
 
@@ -175,8 +182,8 @@
 		}
 
 		function drawSet(set, progress = 0) {
-			if(show.sets.length == 0){
-				return; 
+			if (show.sets.length == 0) {
+				return;
 			}
 
 			canvas.setFill("#F00");
@@ -250,10 +257,10 @@
 			}
 		}
 
-		function queueRender(all){
+		function queueRender(all) {
 			all ??= renderField;
 
-			if(isAnimating){
+			if (isAnimating) {
 				renderField = all;
 				return;
 			}
@@ -261,29 +268,13 @@
 			draw(all);
 		}
 
-		function drawUIElement(el){
+		function drawUIElement(el) {
 			fieldCanvas.drawCircle(el.x, el.y, el.size / 2);
 			fieldCanvas.drawImage(el.image, el.x, el.y, el.size / 2);
 		}
 
-		function drawUI(){
-			/*fieldCanvas.drawCircle(3.75, FIELD_HEIGHT - 2.6, 2);
-			if(isAnimating){
-				fieldCanvas.drawImage(assets.pause.image, 3.75, FIELD_HEIGHT - 4.5, 4);
-			} else {
-				fieldCanvas.drawImage(assets.play.image, 3.75, FIELD_HEIGHT - 4.5, 4);
-			}
-
-			fieldCanvas.drawCircle(8.75, FIELD_HEIGHT - 2.6, 2);
-			fieldCanvas.drawImage(assets.grid.image, 8.5, FIELD_HEIGHT - 3.8, 2.5);
-
-			fieldCanvas.drawCircle(FIELD_WIDTH - 3.75, FIELD_HEIGHT - 2.6, 2);
-			fieldCanvas.drawImage(assets.next.image, FIELD_WIDTH - 4.75, FIELD_HEIGHT - 4.5, 4);
-
-			fieldCanvas.drawCircle(FIELD_WIDTH - 8.75, FIELD_HEIGHT - 2.6, 2);
-			fieldCanvas.drawImage(assets.prev.image, FIELD_WIDTH - 9.75, FIELD_HEIGHT - 4.5, 4);*/
-
-			if(isAnimating){
+		function drawUI() {
+			if (isAnimating) {
 				drawUIElement(assets.pause);
 			} else {
 				drawUIElement(assets.play);
@@ -308,29 +299,45 @@
 
 		window.addEventListener("resize", resize);
 		window.addEventListener("keydown", ev => {
-			if (ev.key == "ArrowLeft" && currentSet > 0 && !isAnimating) {
+			if (ev.key == "ArrowLeft") {
 				previousSet();
-			} else if (ev.key == "ArrowRight" && currentSet < show.sets.length - 1 && !isAnimating) {
+			} else if (ev.key == "ArrowRight") {
 				nextSet();
 			} else if (ev.key == "g") {
-				showGrid = !showGrid;
-				localStorage.setItem("showGrid", showGrid);
-				renderField = true;
+				toggleGrid();
 			} else if (ev.key == " ") {
-				if (isAnimating) {
-					queuedPause = true;
-					return;
-				}
-
-				renderField = true;
-				calculateNextAnimation();
-				window.requestAnimationFrame(animate);
+				togglePlay();
 			} else {
 				return;
 			}
 
 			queueRender();
 		});
+
+		function toggleGrid() {
+			showGrid = !showGrid;
+			localStorage.setItem("showGrid", showGrid);
+			renderField = true;
+		}
+
+		function play() {
+			renderField = true;
+			calculateNextAnimation();
+			window.requestAnimationFrame(animate);
+		}
+
+		function pause() {
+			queuedPause = true;
+		}
+
+		function togglePlay() {
+			if (isAnimating) {
+				pause();
+				return;
+			}
+
+			play();
+		}
 
 		const targetFPS = 1000 / 30; //30 FPS
 
@@ -350,28 +357,48 @@
 
 
 			if (duration >= totalAnimCounts) {
-				nextSet();
+				nextSet(delta);
 
 				if (queuedPause || currentSet == show.sets.length - 1) {
 					isAnimating = false;
 					draw(true);
 					return;
-				} else {
-					calculateNextAnimation(delta);
 				}
 			}
 
 			window.requestAnimationFrame(animate);
 		}
 
-		function nextSet() {
+		function nextSet(delta = null) {
+			if (currentSet >= show.sets.length - 1) {
+				return;
+			}
+
 			setXOffset -= show.sets[currentSet].counts;
 			currentSet++;
+
+			if (isAnimating) {
+				calculateNextAnimation(delta);
+			}
+
+			queueRender();
 		}
 
-		function previousSet() {
-			currentSet--;
-			setXOffset += show.sets[currentSet].counts;
+		function previousSet(delta = null) {
+			if (currentSet <= 0 && !isAnimating) {
+				return;
+			}
+
+			if (currentSet > 0) {
+				currentSet--;
+				setXOffset += show.sets[currentSet].counts;
+			}
+
+			if (isAnimating) {
+				calculateNextAnimation(delta);
+			}
+
+			queueRender();
 		}
 
 		function calculateNextAnimation(delta = null) {

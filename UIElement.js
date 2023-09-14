@@ -3,16 +3,16 @@ class UIElement{
 	x = 0;
 	y = 0;
 	size = 0;
+	action = () => {};
 
-	constructor(src, x, y, size, callback = null){
+	constructor(src, x, y, size, callback, action){
 		this.image = new Image();
 		this.image.src = src;
-		if(callback != null){
-			this.image.onload = callback;
-		}
-
+		this.image.onload = callback;
+		
 		this.x = x;
 		this.y = y;
 		this.size = size;
+		this.action = action;
 	}
 }
