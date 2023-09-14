@@ -23,17 +23,14 @@ class Canvas {
 	setScale(scale) {
 		const w = this.#targetW * scale;
 		const h = this.#targetH * scale;
-		const ratio = Math.ceil(window.devicePixelRatio);
-
-		this.#el.width = w * ratio;
-		this.#el.height = h * ratio;
-
-		this.#ctx.scale(ratio, ratio);
+		
+		this.#el.width = w;
+		this.#el.height = h;
 
 		this.#el.style.width = `${w}px`;
 		this.#el.style.height = `${h}px`;
 
-		this.#scale = scale * ratio;
+		this.#scale = scale;
 	}
 
 	setFont(font) {
